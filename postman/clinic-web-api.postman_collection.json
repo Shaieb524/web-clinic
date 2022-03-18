@@ -1,0 +1,87 @@
+{
+	"info": {
+		"_postman_id": "a0730820-ade3-4d6c-8e8b-ebfd6da9e0e4",
+		"name": "clinic-web-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Ping",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{clinic_api}}/ping",
+					"host": [
+						"{{clinic_api}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"joud\",\r\n    \"password\": \"1234\",\r\n    \"role\": \"patient\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{clinic_api}}/user",
+					"host": [
+						"{{clinic_api}}"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{clinic_api}}/user/6234c542e8826db7aabde7c5",
+					"host": [
+						"{{clinic_api}}"
+					],
+					"path": [
+						"user",
+						"6234c542e8826db7aabde7c5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{clinic_api}}/users",
+					"host": [
+						"{{clinic_api}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
