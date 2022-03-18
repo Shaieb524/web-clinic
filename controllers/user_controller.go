@@ -36,10 +36,12 @@ func CreateUser(c *fiber.Ctx) error {
 	}
 
 	newUser := models.User{
-		Id:       primitive.NewObjectID(),
-		Name:     user.Name,
-		Password: user.Password,
-		Role:     user.Role,
+		Id:            primitive.NewObjectID(),
+		Name:          user.Name,
+		Password:      user.Password,
+		Role:          user.Role,
+		Token:         user.Token,
+		Refresh_token: user.Refresh_token,
 	}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
@@ -70,6 +72,28 @@ func GetAUser(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
 }
+
+//TODO
+// func GetAUserByName(c *fiber.Ctx) error {
+// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+// username := c.Params("username")
+// var user models.User
+// defer cancel()
+
+// objId, _ := primitive.ObjectIDFromHex(username)
+
+// fmt.Println("userId : ", username)
+// fmt.Println("objectid : ", objId)
+// fmt.Println("user : ", user)
+
+// err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
+// if err != nil {
+// 	fmt.Println("error getting a user : ", username, user)
+// 	return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+// }
+
+// return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
+// }
 
 func GetAllUsers(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
