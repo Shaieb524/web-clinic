@@ -86,15 +86,14 @@ func EditAUser(c *fiber.Ctx) error {
 	update := bson.M{"name": user.Name, "location": user.Location, "title": user.Title}
 
 	result, err := userCollection.UpdateOne(ctx, bson.M{"id": objId}, bson.M{"$set": update})
-
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
+
 	//get updated user details
 	var updatedUser models.User
 	if result.MatchedCount == 1 {
 		err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&updatedUser)
-
 		if err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
