@@ -9,6 +9,10 @@ import (
 func main() {
 	app := fiber.New()
 
+	app.Get("/ping", func(c *fiber.Ctx) error {
+		return c.JSON(&fiber.Map{"data": "pong"})
+	})
+
 	configs.ConnectDB()
 	routes.UserRoute(app)
 
