@@ -15,10 +15,62 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 var validate = validator.New()
+
+func RegisterUser(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 12)
+
+	newUser := models.User{
+		Name:     data["name"],
+		Email:    data["email"],
+		Password: password,
+		Role:     data["role"],
+	}
+
+	result, err := userCollection.InsertOne(ctx, newUser)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
+}
+
+func Login(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	var data map[string]string
+
+	if err := c.BodyParser(&data); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	var user models.User
+	err := userCollection.FindOne(ctx, bson.M{"email": data["email"]}).Decode(&user)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Invalid Credentials"}})
+	}
+
+	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Invalid Credentials"}})
+
+	}
+
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
+}
 
 func CreateUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -72,28 +124,6 @@ func GetAUser(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
 }
-
-//TODO
-// func GetAUserByName(c *fiber.Ctx) error {
-// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-// username := c.Params("username")
-// var user models.User
-// defer cancel()
-
-// objId, _ := primitive.ObjectIDFromHex(username)
-
-// fmt.Println("userId : ", username)
-// fmt.Println("objectid : ", objId)
-// fmt.Println("user : ", user)
-
-// err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
-// if err != nil {
-// 	fmt.Println("error getting a user : ", username, user)
-// 	return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
-// }
-
-// return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
-// }
 
 func GetAllUsers(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
