@@ -8,14 +8,16 @@ import (
 
 func main() {
 	app := fiber.New()
+	configs.ConnectDB()
 
+	// unauthorized routes
 	app.Get("/ping", func(c *fiber.Ctx) error {
 		return c.JSON(&fiber.Map{"data": "pong"})
 	})
-
-	configs.ConnectDB()
 	routes.UnauthRoute(app)
+
+	// restricted routes
 	routes.UserRoute(app)
 
-	app.Listen(":6000")
+	app.Listen(":" + configs.EnvPort())
 }

@@ -22,5 +22,14 @@ func EnvSecretKey() string {
 		log.Fatal("Error loading .env file")
 	}
 
-	return os.Getenv("SECRET_KEY")
+	return os.Getenv("MONGO_URI")
+}
+
+func EnvPort() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	return os.Getenv("API_PORT")
 }
