@@ -14,6 +14,7 @@ func main() {
 	})
 
 	configs.ConnectDB()
+	routes.UnauthRoute(app)
 	routes.UserRoute(app)
 
 	app.Listen(":6000")
