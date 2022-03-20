@@ -6,82 +6,143 @@
 	},
 	"item": [
 		{
-			"name": "Ping",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{clinic_api}}/ping",
-					"host": [
-						"{{clinic_api}}"
-					],
-					"path": [
-						"ping"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create user",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"joud\",\r\n    \"password\": \"1234\",\r\n    \"role\": \"patient\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+			"name": "Unauthorized",
+			"item": [
+				{
+					"name": "Ping",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc3ODk4NTMsImlzcyI6ImZhZGlAZ21haWwuY29tIn0.mRs7DHUCjQhdJ3w4QArA9LSSYwR05cbdN2p0ZLw4V3c",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{clinic_api}}/ping",
+							"host": [
+								"{{clinic_api}}"
+							],
+							"path": [
+								"ping"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{clinic_api}}/user",
-					"host": [
-						"{{clinic_api}}"
-					],
-					"path": [
-						"user"
-					]
+				{
+					"name": "Register user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"hhh\",\r\n    \"email\": \"hhh@gmail.com\",\r\n    \"password\": \"hhh\",\r\n    \"role\": \"1\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{clinic_api}}/register",
+							"host": [
+								"{{clinic_api}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"hhh@gmail.com\",\r\n    \"password\": \"hhh\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{clinic_api}}/login",
+							"host": [
+								"{{clinic_api}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "Get user",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{clinic_api}}/user/6234c542e8826db7aabde7c5",
-					"host": [
-						"{{clinic_api}}"
-					],
-					"path": [
-						"user",
-						"6234c542e8826db7aabde7c5"
-					]
+			"name": "restricted",
+			"item": [
+				{
+					"name": "Get user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{clinic_api}}/user/6234c542e8826db7aabde7c5",
+							"host": [
+								"{{clinic_api}}"
+							],
+							"path": [
+								"user",
+								"6234c542e8826db7aabde7c5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{clinic_api}}/users",
+							"host": [
+								"{{clinic_api}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "Authorization",
+									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get all users",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{clinic_api}}/users",
-					"host": [
-						"{{clinic_api}}"
-					],
-					"path": [
-						"users"
-					]
-				}
-			},
-			"response": []
+			]
 		}
 	]
 }
