@@ -21,16 +21,16 @@ import (
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
 func TestJwt(c *fiber.Ctx) error {
-
 	user := c.Locals("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-
 	fmt.Println("user : ", user)
-	fmt.Println("claims : ", claims)
-	fmt.Println("name : ", name)
 
-	return c.SendString("Welcome " + name)
+	claims := user.Claims.(jwt.MapClaims)
+	fmt.Println("claims : ", claims)
+
+	email := claims["iss"].(string)
+	fmt.Println("name : ", email)
+
+	return c.SendString("Welcome " + email)
 }
 
 func GetAUser(c *fiber.Ctx) error {
