@@ -6,7 +6,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func UnauthRoute(app *fiber.App) {
-	app.Post("/user/register", controllers.RegisterUser)
-	app.Post("/user/login", controllers.Login)
+func UnauthRoutes(app *fiber.App) {
+	app.Get("/ping", controllers.Ping)
+	app.Post("/register", controllers.RegisterUser)
+	app.Post("/login", controllers.Login)
 }

@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/Shaieb524/web-clinic.git/configs"
 	"github.com/Shaieb524/web-clinic.git/routes"
+
 	"github.com/gofiber/fiber/v2"
+	jwtware "github.com/gofiber/jwt/v3"
 )
 
 func main() {
@@ -11,13 +13,15 @@ func main() {
 	configs.ConnectDB()
 
 	// unauthorized routes
-	app.Get("/ping", func(c *fiber.Ctx) error {
-		return c.JSON(&fiber.Map{"data": "pong"})
-	})
-	routes.UnauthRoute(app)
+	routes.UnauthRoutes(app)
+
+	// JWT Middleware
+	app.Use(jwtware.New(jwtware.Config{
+		SigningKey: []byte(configs.EnvSecretKey()),
+	}))
 
 	// restricted routes
-	routes.UserRoute(app)
+	routes.UserRoutes(app)
 
 	app.Listen(":" + configs.EnvPort())
 }

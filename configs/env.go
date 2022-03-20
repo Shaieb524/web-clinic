@@ -22,7 +22,7 @@ func EnvSecretKey() string {
 		log.Fatal("Error loading .env file")
 	}
 
-	return os.Getenv("MONGO_URI")
+	return os.Getenv("SECRET_KEY")
 }
 
 func EnvPort() string {

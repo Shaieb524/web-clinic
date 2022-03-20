@@ -2,6 +2,8 @@ module github.com/Shaieb524/web-clinic.git
 
 go 1.17
 
+require github.com/gofiber/jwt/v3 v3.2.8
+
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
@@ -11,6 +13,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gofiber/fiber/v2 v2.29.0 // indirect
 	github.com/gofiber/utils v0.0.10 // indirect
+	github.com/golang-jwt/jwt/v4 v4.3.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/gorilla/schema v1.1.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

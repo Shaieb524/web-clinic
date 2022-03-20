@@ -15,6 +15,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func Ping(c *fiber.Ctx) error {
+	return c.JSON(&fiber.Map{"message": "pong"})
+}
+
 func RegisterUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
