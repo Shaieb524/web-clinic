@@ -31,5 +31,5 @@ func EnvPort() string {
 		log.Fatal("Error loading .env file")
 	}
 
-	return os.Getenv("API_PORT")
+	return os.Getenv("PORT")
 }
