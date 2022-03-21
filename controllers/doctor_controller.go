@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -22,8 +21,6 @@ func GetAllDoctors(c *fiber.Ctx) error {
 
 	results, err := userCollection.Find(ctx, bson.M{"role": "doctor"})
 
-	fmt.Println("results : ", results)
-
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
@@ -41,5 +38,22 @@ func GetAllDoctors(c *fiber.Ctx) error {
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctors": users}},
+	)
+}
+
+func GetDoctorByName(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	doctorName := c.Params("doctorName")
+
+	result, err := userCollection.Find(ctx, bson.M{"name": doctorName})
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctors": result}},
 	)
 }
