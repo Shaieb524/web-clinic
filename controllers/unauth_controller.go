@@ -29,6 +29,7 @@ func RegisterUser(c *fiber.Ctx) error {
 		return err
 	}
 
+	//encypt user's password before saving to db
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 12)
 
 	newUser := models.User{

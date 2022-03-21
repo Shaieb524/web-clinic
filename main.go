@@ -26,6 +26,7 @@ func main() {
 
 	// restricted routes
 	routes.UserRoutes(app)
+	routes.DoctorRoutes(app)
 
 	app.Listen(":" + configs.EnvPort())
 }
