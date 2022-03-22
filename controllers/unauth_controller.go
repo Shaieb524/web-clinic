@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	// "fmt"
 	"net/http"
 	"time"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/Shaieb524/web-clinic.git/responses"
 
 	"github.com/dgrijalva/jwt-go"
-	// "github.com/labstack/echo"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -116,12 +114,12 @@ func generateTokenPair(userEmail string) (tokenPair, error) {
 	return tPair, nil
 }
 
-type handler struct{}
+// type handler struct{}
 
 // This is the api to refresh tokens
 // Most of the code is taken from the jwt-go package's sample codes
 // https://godoc.org/github.com/dgrijalva/jwt-go#example-Parse--Hmac
-// func (h *handler) RefreshToken(c echo.Context) error {
+// func RefreshToken(c echo.Context) error {
 // 	type tokenReqBody struct {
 // 		RefreshToken string `json:"refresh_token"`
 // 	}
@@ -148,7 +146,7 @@ type handler struct{}
 // 		// run through your business logic to verify if the user can log in
 // 		if int(claims["sub"].(float64)) == 1 {
 
-// 			newTokenPair, err := generateTokenPair()
+// 			newTokenPair, err := generateTokenPair("joud@gmail.com")
 // 			if err != nil {
 // 				return err
 // 			}

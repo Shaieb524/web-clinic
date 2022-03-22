@@ -10,4 +10,5 @@ func UnauthRoutes(app *fiber.App) {
 	app.Get("/ping", controllers.Ping)
 	app.Post("/register", controllers.RegisterUser)
 	app.Post("/login", controllers.Login)
+	// app.Post("/refresh-token", controllers.)
 }
