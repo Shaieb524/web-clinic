@@ -41,10 +41,6 @@ func GetAUser(c *fiber.Ctx) error {
 
 	objId, _ := primitive.ObjectIDFromHex(userId)
 
-	fmt.Println("userId : ", userId)
-	fmt.Println("objectid : ", objId)
-	fmt.Println("user : ", user)
-
 	err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
 	if err != nil {
 		fmt.Println("error getting a user : ", userId, user)
