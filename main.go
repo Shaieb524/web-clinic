@@ -21,11 +21,12 @@ func main() {
 
 	// JWT validation
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(configs.EnvSecretKey()),
+		SigningKey: []byte(configs.EnvTokenSecretKey()),
 	}))
 
 	// restricted routes
 	routes.UserRoutes(app)
+	routes.DoctorRoutes(app)
 
 	app.Listen(":" + configs.EnvPort())
 }
