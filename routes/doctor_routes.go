@@ -8,6 +8,6 @@ import (
 
 func DoctorRoutes(app *fiber.App) {
 	app.Get("/doctors", controllers.GetAllDoctors)
-	// app.Get("/doctors/:doctorName", controllers.GetDoctorByName)
-	// app.Get("/doctors/:doctorId", controllers.GetDoctorById)
+	// app.Get("/doctors/:name", controllers.GetDoctorByName)
+	app.Get("/doctors/:id", controllers.GetDoctorById)
 }
