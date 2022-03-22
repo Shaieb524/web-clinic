@@ -21,7 +21,7 @@ func main() {
 
 	// JWT validation
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(configs.EnvSecretKey()),
+		SigningKey: []byte(configs.EnvTokenSecretKey()),
 	}))
 
 	// restricted routes

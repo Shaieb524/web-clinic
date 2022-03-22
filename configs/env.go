@@ -16,13 +16,22 @@ func EnvMongoURI() string {
 	return os.Getenv("MONGO_URI")
 }
 
-func EnvSecretKey() string {
+func EnvTokenSecretKey() string {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	return os.Getenv("SECRET_KEY")
+	return os.Getenv("TOKEN_SECRET_KEY")
+}
+
+func EnvRefreshTokenSecretKey() string {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	return os.Getenv("REFRESH_TOKEN_SECRET_KEY")
 }
 
 func EnvPort() string {

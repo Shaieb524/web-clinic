@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -42,18 +43,50 @@ func GetAllDoctors(c *fiber.Ctx) error {
 }
 
 func GetDoctorByName(c *fiber.Ctx) error {
+	fmt.Println("gegt doc by name")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	doctorName := c.Params("doctorName")
+	// doctorName := c.Params("doctorName")
 
-	result, err := userCollection.Find(ctx, bson.M{"name": doctorName})
+	// result, err := userCollection.FindOne(ctx, bson.M{"name": "sawsan"})
 
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
-	}
+	// var user models.User
+	// res := userCollection.FindOne(ctx, bson.M{"name": "sawsan"}).Decode(&user)?
+
+	filter := bson.M{"name": "sawsan"}
+	singleResult := userCollection.FindOne(ctx, filter)
+	fmt.Println("sing res : ", singleResult)
+
+	// if err != nil {
+	// 	fmt.Println("err 1 : ", err)
+	// 	return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	// }
+	// fmt.Println("err 2 : ", err)
 
 	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctors": result}},
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctor": singleResult}},
 	)
+}
+
+func GetDoctorById(c *fiber.Ctx) int {
+	fmt.Println("gegt doc by id")
+	return 1
+	// get id by params
+	// params := c.Params("id")
+
+	// _id, err := primitive.ObjectIDFromHex(params)
+	// if err != nil {
+	// 	return c.Status(500).SendString(err.Error())
+	// }
+
+	// filter := bson.D{{"_id", _id}}
+
+	// var result models.User
+
+	// if err != userCollection.FindOne(c.Context(), filter).Decode(&result); err != nil {
+	// 	return c.Status(500).SendString("Something went wrong.")
+	// }
+
+	// return c.Status(fiber.StatusOK).JSON(result)
 }
