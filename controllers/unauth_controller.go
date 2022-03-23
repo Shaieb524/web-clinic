@@ -2,10 +2,12 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/Shaieb524/web-clinic.git/configs"
+	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
 
@@ -13,6 +15,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -46,7 +49,20 @@ func RegisterUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
+	insetredStrId := result.InsertedID.(primitive.ObjectID).Hex()
+	var ds models.DoctorSchedule
+
+	if data["role"] == "doctor" {
+
+		fmt.Println("this is a doctor!!!")
+		fmt.Println("newUser : ", newUser)
+		fmt.Printf("%T\n", newUser)
+		ds = helpers.GenerateWeekDoctorSchedule(insetredStrId)
+	}
+
+	fmt.Println("doctor init schedule : ", ds)
+
+	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"user": result}})
 }
 
 func Login(c *fiber.Ctx) error {
