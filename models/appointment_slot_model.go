@@ -2,7 +2,7 @@ package models
 
 import "time"
 
-type Appointment struct {
+type AppointmentSlot struct {
 	PatientId string    `json:"patientId,omitempty" validate:"required"`
 	DoctorId  string    `json:"doctorId,omitempty" validate:"required"`
 	Duration  int       `json:"duration,omitempty" validate:"required"`
