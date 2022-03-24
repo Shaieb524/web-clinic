@@ -14,24 +14,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
-
-func TestJwt(c *fiber.Ctx) error {
-	user := c.Locals("user").(*jwt.Token)
-	fmt.Println("user : ", user)
-
-	claims := user.Claims.(jwt.MapClaims)
-	fmt.Println("claims : ", claims)
-
-	email := claims["iss"].(string)
-	fmt.Println("name : ", email)
-
-	return c.SendString("Welcome " + email)
-}
 
 func GetAUser(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

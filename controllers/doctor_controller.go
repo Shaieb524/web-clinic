@@ -74,3 +74,19 @@ func GetDoctorById(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(doctorDoc)
 }
+
+func GetDoctorScheduleById(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	idParam := c.Params("doctorId")
+	doctorId, err := primitive.ObjectIDFromHex(idParam)
+
+	query := bson.D{{Key: "_id", Value: doctorId}}
+
+	var doctorDoc bson.M
+	if err = userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
+		fmt.Println(err)
+	}
+
+	return c.Status(fiber.StatusOK).JSON(doctorDoc["schedule"])
+}

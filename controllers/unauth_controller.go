@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Shaieb524/web-clinic.git/configs"
+	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
 
@@ -40,13 +41,19 @@ func RegisterUser(c *fiber.Ctx) error {
 		Role:     data["role"],
 	}
 
+	// if user is a doctor then initialize a schedule
+	if data["role"] == "doctor" {
+		ds := models.DoctorSchedule(helpers.GenerateWeekDoctorSchedule("_id"))
+		newUser.Schedule = ds
+	}
+
 	result, err := userCollection.InsertOne(ctx, newUser)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 	}
 
-	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"data": result}})
+	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"user": result}})
 }
 
 func Login(c *fiber.Ctx) error {
