@@ -8,6 +8,7 @@ import (
 func GenerateAppointementSlots(slotsNo int, doctorId string) []models.AppointmentSlot {
 	apptpointmentSlots := make([]models.AppointmentSlot, slotsNo)
 
+	// assign incremental no. to slots
 	for i := range apptpointmentSlots {
 		apptpointmentSlots[i].SlotNo = i + 1
 	}
@@ -28,7 +29,6 @@ func GenerateWeekDoctorSchedule(doctorId string) models.DoctorSchedule {
 	}
 
 	var ds models.DoctorSchedule
-	// ds.DoctorId = doctorId
 	ds.WeeklySchedule = schedule
 
 	return ds

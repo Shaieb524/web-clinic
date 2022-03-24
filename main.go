@@ -6,7 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
-	jwtware "github.com/gofiber/jwt/v3"
+	// jwtware "github.com/gofiber/jwt/v3"
 )
 
 func main() {
@@ -20,13 +20,14 @@ func main() {
 	routes.UnauthRoutes(app)
 
 	// JWT validation
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(configs.EnvTokenSecretKey()),
-	}))
+	// app.Use(jwtware.New(jwtware.Config{
+	// 	SigningKey: []byte(configs.EnvTokenSecretKey()),
+	// }))
 
 	// restricted routes
 	routes.UserRoutes(app)
 	routes.DoctorRoutes(app)
+	routes.AppointmentRoutes(app)
 
 	app.Listen(":" + configs.EnvPort())
 }
