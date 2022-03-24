@@ -88,8 +88,5 @@ func GetDoctorScheduleById(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
-	fmt.Println("doctorDoc : ", doctorDoc["schedule"])
-	fmt.Printf("%T", doctorDoc)
-
 	return c.Status(fiber.StatusOK).JSON(doctorDoc["schedule"])
 }
