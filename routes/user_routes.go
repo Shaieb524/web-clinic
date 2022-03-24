@@ -9,5 +9,4 @@ import (
 func UserRoutes(app *fiber.App) {
 	app.Get("/user/:userId", controllers.GetAUser)
 	app.Get("/users", controllers.GetAllUsers)
-	app.Get("/testjwt", controllers.TestJwt)
 }
