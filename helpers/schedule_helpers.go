@@ -8,9 +8,9 @@ import (
 func GenerateAppointementSlots(slotsNo int, doctorId string) []models.AppointmentSlot {
 	apptpointmentSlots := make([]models.AppointmentSlot, slotsNo)
 
-	// for i := range apptpointmentSlots {
-	// 	apptpointmentSlots[i].DoctorId = doctorId
-	// }
+	for i := range apptpointmentSlots {
+		apptpointmentSlots[i].SlotNo = i + 1
+	}
 
 	return apptpointmentSlots
 }
