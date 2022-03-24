@@ -10,4 +10,5 @@ func DoctorRoutes(app *fiber.App) {
 	app.Get("/doctors", controllers.GetAllDoctors)
 	// app.Get("/doctors/:name", controllers.GetDoctorByName)
 	app.Get("/doctors/:id", controllers.GetDoctorById)
+	app.Get("/doctors/:doctorId/slots", controllers.GetDoctorScheduleById)
 }

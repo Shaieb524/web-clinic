@@ -43,7 +43,7 @@ func RegisterUser(c *fiber.Ctx) error {
 
 	// if user is a doctor then initialize a schedule
 	if data["role"] == "doctor" {
-		ds := models.DoctorSchedule(helpers.GenerateWeekDoctorSchedule("insetredStrId"))
+		ds := models.DoctorSchedule(helpers.GenerateWeekDoctorSchedule("_id"))
 		newUser.Schedule = ds
 	}
 
