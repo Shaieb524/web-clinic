@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Shaieb524/web-clinic.git/customsturctures"
+	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/responses"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,10 +30,10 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 		return err
 	}
 
-	if userRole := requestData.Role; userRole != "patient" {
+	if checkRoleResult := helpers.RoleValidator(requestData.Role, "patient"); checkRoleResult != "allowed" {
 		return c.Status(http.StatusUnauthorized).JSON(
 			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed",
-				Data: &fiber.Map{"problem": "Only patients allowed to book appointment slots!"}},
+				Data: &fiber.Map{"problem": "Only patients are allowed to book appointment slots!"}},
 		)
 	}
 
@@ -48,7 +49,6 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	var doctorDoc bson.M
 	if err := userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
 		fmt.Println("Error finding doctor : ", err)
-
 		return c.Status(http.StatusInternalServerError).JSON(
 			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
 		)
