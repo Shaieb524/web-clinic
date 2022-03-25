@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+
 	"strconv"
 	"time"
 
@@ -19,17 +20,30 @@ type SlotUpdateData struct {
 	isBooked  bool
 }
 
+type NewSlotDataRequest struct {
+	DoctorID       string
+	PatientID      string
+	AppointmentDay string
+	SlotNo         string
+	Duration       string
+}
+
+type BookSlotRequest struct {
+	Role     string
+	Slotdata NewSlotDataRequest
+}
+
 func BookAppointmentSlot(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	var data map[string]string
-
-	if err := c.BodyParser(&data); err != nil {
+	requestData := new(BookSlotRequest)
+	if err := c.BodyParser(&requestData); err != nil {
 		return err
 	}
 
-	doctorId := data["doctorId"]
+	requestSlotdata := requestData.Slotdata
+	doctorId := requestSlotdata.DoctorID
 	doctorObjId, err := primitive.ObjectIDFromHex(doctorId)
 	if err != nil {
 		panic(err)
@@ -40,19 +54,26 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	var doctorDoc bson.M
 	if err := userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
 		fmt.Println("Error finding doctor : ", err)
+
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.UserResponse{Status: http.StatusOK, Message: "failed", Data: &fiber.Map{"bookedSlot": err}},
+		)
 	}
 
-	intSlotNo, err := strconv.Atoi(data["slotNo"])
+	intSlotNo, err := strconv.Atoi(requestSlotdata.SlotNo)
 	if err != nil {
-		fmt.Println("error parsing slotNo to integer!")
+		fmt.Println("error parsing slotNo to integer!", err)
+		return c.Status(http.StatusInternalServerError).JSON(
+			responses.UserResponse{Status: http.StatusOK, Message: "failed", Data: &fiber.Map{"bookedSlot": err}},
+		)
 	}
 
 	var newSlotData SlotUpdateData
-	newSlotData.PatientID = data["patientId"]
-	newSlotData.Duration, err = strconv.Atoi(data["duration"])
+	newSlotData.PatientID = requestSlotdata.PatientID
+	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
 
-	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, data["appointmentDay"], intSlotNo, newSlotData)
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, intSlotNo, newSlotData)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
@@ -75,12 +96,17 @@ func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay s
 func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primitive.M,
 	slotDay string, slotNo int, newSlotData SlotUpdateData) interface{} {
 
+	fmt.Println("doctorObjId : ", doctorObjId)
+
 	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, slotDay, slotNo)
+
+	// update booked slot with new data
 	slot.(primitive.M)["patientid"] = newSlotData.PatientID
 	slot.(primitive.M)["duration"] = newSlotData.Duration
 	slot.(primitive.M)["isbooked"] = newSlotData.isBooked
 	newSchedule := doctorProfile["schedule"]
 
+	// update doctor document in database
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
