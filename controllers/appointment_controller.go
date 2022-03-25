@@ -13,6 +13,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type SlotUpdateData struct {
+	PatientID string
+	Duration  int
+	isBooked  bool
+}
+
 func BookAppointmentSlot(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -41,14 +47,20 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 		fmt.Println("error parsing slotNo to integer!")
 	}
 
-	appointmentSlot := FindAppoinmentSlot(doctorDoc, data["appointmentDay"], intSlotNo)
+	var newSlotData SlotUpdateData
+	newSlotData.PatientID = data["patientId"]
+	newSlotData.Duration, err = strconv.Atoi(data["duration"])
+	newSlotData.isBooked = true
+
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, data["appointmentDay"], intSlotNo, newSlotData)
+
 	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"slot": appointmentSlot}},
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
 	)
 
 }
 
-func FindAppoinmentSlot(doctorProfile primitive.M, slotDay string, slotNo int) interface{} {
+func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int) interface{} {
 
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
@@ -56,5 +68,34 @@ func FindAppoinmentSlot(doctorProfile primitive.M, slotDay string, slotNo int) i
 	day := ws.(primitive.M)[slotDay]
 	appointmentsSlots := day.(primitive.M)["appointments"]
 	slot := appointmentsSlots.(primitive.A)[slotNo-1]
+
+	return slot
+}
+
+func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primitive.M,
+	slotDay string, slotNo int, newSlotData SlotUpdateData) interface{} {
+
+	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, slotDay, slotNo)
+	slot.(primitive.M)["patientid"] = newSlotData.PatientID
+	slot.(primitive.M)["duration"] = newSlotData.Duration
+	slot.(primitive.M)["isbooked"] = newSlotData.isBooked
+	newSchedule := doctorProfile["schedule"]
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	updatedSchedule, err := userCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": doctorObjId},
+		bson.D{
+			{"$set", bson.D{{"schedule", newSchedule}}},
+		},
+	)
+
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Updated %v Documents!\n", updatedSchedule.ModifiedCount)
+
 	return slot
 }
