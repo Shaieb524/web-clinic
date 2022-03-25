@@ -29,6 +29,13 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 		return err
 	}
 
+	if userRole := requestData.Role; userRole != "patient" {
+		return c.Status(http.StatusUnauthorized).JSON(
+			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed",
+				Data: &fiber.Map{"problem": "Only patients allowed to book appointment slots!"}},
+		)
+	}
+
 	requestSlotdata := requestData.Slotdata
 	doctorId := requestSlotdata.DoctorID
 	doctorObjId, err := primitive.ObjectIDFromHex(doctorId)
@@ -43,7 +50,7 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 		fmt.Println("Error finding doctor : ", err)
 
 		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusOK, Message: "failed", Data: &fiber.Map{"bookedSlot": err}},
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
 		)
 	}
 
@@ -51,7 +58,7 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	if err != nil {
 		fmt.Println("error parsing slotNo to integer!", err)
 		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusOK, Message: "failed", Data: &fiber.Map{"bookedSlot": err}},
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
 		)
 	}
 
