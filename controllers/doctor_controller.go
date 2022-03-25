@@ -72,7 +72,9 @@ func GetDoctorById(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(doctorDoc)
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctor": doctorDoc}},
+	)
 }
 
 func GetDoctorScheduleById(c *fiber.Ctx) error {
@@ -88,5 +90,7 @@ func GetDoctorScheduleById(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(doctorDoc["schedule"])
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"schedule": doctorDoc["schedule"]}},
+	)
 }
