@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-
 	"strconv"
 	"time"
 
+	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/responses"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,24 +20,11 @@ type SlotUpdateData struct {
 	isBooked  bool
 }
 
-type NewSlotDataRequest struct {
-	DoctorID       string
-	PatientID      string
-	AppointmentDay string
-	SlotNo         string
-	Duration       string
-}
-
-type BookSlotRequest struct {
-	Role     string
-	Slotdata NewSlotDataRequest
-}
-
 func BookAppointmentSlot(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
-	requestData := new(BookSlotRequest)
+	requestData := new(customsturctures.BookSlotRequest)
 	if err := c.BodyParser(&requestData); err != nil {
 		return err
 	}
