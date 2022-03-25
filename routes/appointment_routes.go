@@ -8,4 +8,5 @@ import (
 
 func AppointmentRoutes(app *fiber.App) {
 	app.Post("/appointments/book-appointment", controllers.BookAppointmentSlot)
+	app.Post("/appointments/cancel-appointment", controllers.CancelAppointmentSlot)
 }
