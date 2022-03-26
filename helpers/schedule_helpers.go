@@ -24,7 +24,7 @@ func GenerateWeekDoctorSchedule(doctorId string) models.DoctorSchedule {
 
 	for i := range weekDays {
 		sd := models.ScheduleDay{}
-		sd.Appointments = appointmentSlots
+		sd.AppointmentSlots = appointmentSlots
 		schedule[weekDays[i]] = sd
 	}
 

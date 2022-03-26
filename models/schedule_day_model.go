@@ -1,5 +1,5 @@
 package models
 
 type ScheduleDay struct {
-	Appointments []AppointmentSlot `json:"appointments,omitempty" validate:"required"`
+	AppointmentSlots []AppointmentSlot `json:"appointments_slots,omitempty" validate:"required"`
 }
