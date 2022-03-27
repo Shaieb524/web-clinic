@@ -73,6 +73,11 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
 
+	// fmt.Println("doc id : ", doctorObjId)
+	// fmt.Printf("doc id %T\n: ", doctorObjId)
+
+	fmt.Println("newSlotData : ", newSlotData)
+
 	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
 
 	// insert booked appointment to collection
@@ -142,12 +147,13 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 }
 
 func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int32) interface{} {
+	fmt.Println("---------------------Extract-------------------------: ")
 
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
 	ws := ds.(primitive.M)["weeklyschedule"]
 	day := ws.(primitive.M)[slotDay]
-	appointmentsSlots := day.(primitive.M)["appointments"]
+	appointmentsSlots := day.(primitive.M)["appointmentslots"]
 	slot := appointmentsSlots.(primitive.A)[slotNo-1]
 
 	return slot
@@ -155,8 +161,6 @@ func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay s
 
 func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primitive.M,
 	slotDay string, slotNo int32, newSlotData SlotUpdateData) interface{} {
-
-	fmt.Println("doctorObjId : ", doctorObjId)
 
 	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, slotDay, slotNo)
 
@@ -219,3 +223,7 @@ func insertToBookedAppointmentsCollection(ba models.BookedAppointment) {
 
 	fmt.Println("insert res /L ", result)
 }
+
+// func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
+
+// }
