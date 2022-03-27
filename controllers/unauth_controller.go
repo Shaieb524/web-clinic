@@ -45,6 +45,7 @@ func RegisterUser(c *fiber.Ctx) error {
 	if data["role"] == "doctor" {
 		ds := models.DoctorSchedule(helpers.GenerateWeekDoctorSchedule("_id"))
 		newUser.Schedule = ds
+		newUser.Available = true
 	}
 
 	result, err := userCollection.InsertOne(ctx, newUser)
