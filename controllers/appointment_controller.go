@@ -7,15 +7,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Shaieb524/web-clinic.git/configs"
 	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/helpers"
+	"github.com/Shaieb524/web-clinic.git/models"
 
-	// "github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var bookedAppointmentsCollection *mongo.Collection = configs.GetCollection(configs.DB, "bookedAppointments")
 
 type SlotUpdateData struct {
 	PatientID string
@@ -68,14 +72,24 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	newSlotData.PatientID = requestSlotdata.PatientID
 	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
-	fmt.Println("newSlot : ", newSlotData)
 
-	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, intSlotNo, newSlotData)
+	fmt.Println("newSlotData : ", newSlotData)
+
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
+
+	// insert booked appointment to collection
+	bookedAppointmentItem := models.BookedAppointment{
+		PatientId: requestSlotdata.PatientID,
+		DoctorId:  requestSlotdata.DoctorID,
+		SlotNo:    intSlotNo,
+		Day:       requestSlotdata.AppointmentDay,
+		Duration:  newSlotData.Duration,
+	}
+	insertToBookedAppointmentsCollection(bookedAppointmentItem)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
 	)
-
 }
 
 func CancelAppointmentSlot(c *fiber.Ctx) error {
@@ -121,7 +135,7 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 	}
 
 	var newSlotData SlotUpdateData
-	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, intSlotNo, newSlotData)
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
 	fmt.Println("newSlot : ", newSlotData)
 
 	return c.Status(http.StatusOK).JSON(
@@ -129,22 +143,19 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 	)
 }
 
-func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int) interface{} {
-
+func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int32) interface{} {
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
 	ws := ds.(primitive.M)["weeklyschedule"]
 	day := ws.(primitive.M)[slotDay]
-	appointmentsSlots := day.(primitive.M)["appointments"]
+	appointmentsSlots := day.(primitive.M)["appointmentslots"]
 	slot := appointmentsSlots.(primitive.A)[slotNo-1]
 
 	return slot
 }
 
 func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primitive.M,
-	slotDay string, slotNo int, newSlotData SlotUpdateData) interface{} {
-
-	fmt.Println("doctorObjId : ", doctorObjId)
+	slotDay string, slotNo int32, newSlotData SlotUpdateData) interface{} {
 
 	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, slotDay, slotNo)
 
@@ -172,4 +183,67 @@ func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primiti
 	fmt.Printf("Updated %v Documents!\n", updatedSchedule.ModifiedCount)
 
 	return slot
+}
+
+func ViewAppointmentDetails(c *fiber.Ctx) error {
+	var requestData map[string]interface{}
+	if err := c.BodyParser(&requestData); err != nil {
+		return err
+	}
+
+	doctorId := requestData["doctorId"]
+	doctorProfile := getDoctorProfileByStringId(doctorId.(string))
+	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["slotDay"].(string), int32(requestData["slotNo"].(float64)))
+
+	if err := requestData["role"] == "patient" && requestData["patientId"] != slot.(primitive.M)["patientid"]; err {
+		return c.Status(http.StatusUnauthorized).JSON(
+			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: &fiber.Map{"message": "your are not authorized!"}},
+		)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"appointment_details": slot}},
+	)
+}
+
+func insertToBookedAppointmentsCollection(ba models.BookedAppointment) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	result, err := bookedAppointmentsCollection.InsertOne(ctx, ba)
+
+	if err != nil {
+		fmt.Println("erro : ", err)
+	}
+
+	fmt.Println("insert res /L ", result)
+}
+
+func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	idParam := c.Params("id")
+	query := bson.M{"patientid": idParam}
+	results, err := bookedAppointmentsCollection.Find(ctx, query)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+
+	var paitentBookedAppointments []models.BookedAppointment
+	for results.Next(ctx) {
+		var singleAppointment models.BookedAppointment
+		if err = results.Decode(&singleAppointment); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		paitentBookedAppointments = append(paitentBookedAppointments, singleAppointment)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"patient_appointments": paitentBookedAppointments}},
+	)
 }
