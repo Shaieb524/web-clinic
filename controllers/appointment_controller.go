@@ -70,12 +70,11 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	newSlotData.isBooked = true
 	fmt.Println("newSlot : ", newSlotData)
 
-	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, intSlotNo, newSlotData)
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
 	)
-
 }
 
 func CancelAppointmentSlot(c *fiber.Ctx) error {
@@ -121,7 +120,7 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 	}
 
 	var newSlotData SlotUpdateData
-	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, intSlotNo, newSlotData)
+	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
 	fmt.Println("newSlot : ", newSlotData)
 
 	return c.Status(http.StatusOK).JSON(
@@ -129,7 +128,7 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 	)
 }
 
-func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int) interface{} {
+func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int32) interface{} {
 
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
@@ -142,7 +141,7 @@ func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay s
 }
 
 func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primitive.M,
-	slotDay string, slotNo int, newSlotData SlotUpdateData) interface{} {
+	slotDay string, slotNo int32, newSlotData SlotUpdateData) interface{} {
 
 	fmt.Println("doctorObjId : ", doctorObjId)
 
@@ -172,4 +171,21 @@ func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primiti
 	fmt.Printf("Updated %v Documents!\n", updatedSchedule.ModifiedCount)
 
 	return slot
+}
+
+func ViewAppointmentDetails(c *fiber.Ctx) error {
+	// ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	// defer cancel()
+
+	var requestData map[string]interface{}
+	if err := c.BodyParser(&requestData); err != nil {
+		return err
+	}
+
+	doctorId := requestData["doctorId"]
+	doctorProfile := getDoctorProfileByStringId(doctorId.(string))
+	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["slotDay"].(string), int32(requestData["slotNo"].(float64)))
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"appointment_details": slot}},
+	)
 }
