@@ -7,15 +7,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Shaieb524/web-clinic.git/configs"
 	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/helpers"
+	"github.com/Shaieb524/web-clinic.git/models"
 
-	// "github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
+var bookedAppointmentsCollection *mongo.Collection = configs.GetCollection(configs.DB, "bookedAppointments")
 
 type SlotUpdateData struct {
 	PatientID string
@@ -68,9 +72,18 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	newSlotData.PatientID = requestSlotdata.PatientID
 	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
-	fmt.Println("newSlot : ", newSlotData)
 
 	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
+
+	// insert booked appointment to collection
+	bookedAppointmentItem := models.BookedAppointment{
+		PatientId: requestSlotdata.PatientID,
+		DoctorId:  requestSlotdata.DoctorID,
+		SlotNo:    intSlotNo,
+		Day:       requestSlotdata.AppointmentDay,
+		Duration:  newSlotData.Duration,
+	}
+	insertToBookedAppointmentsCollection(bookedAppointmentItem)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
@@ -192,4 +205,17 @@ func ViewAppointmentDetails(c *fiber.Ctx) error {
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"appointment_details": slot}},
 	)
+}
+
+func insertToBookedAppointmentsCollection(ba models.BookedAppointment) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	result, err := bookedAppointmentsCollection.InsertOne(ctx, ba)
+
+	if err != nil {
+		fmt.Println("erro : ", err)
+	}
+
+	fmt.Println("insert res /L ", result)
 }
