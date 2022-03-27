@@ -27,6 +27,7 @@ func main() {
 	// restricted routes
 	routes.UserRoutes(app)
 	routes.DoctorRoutes(app)
+	routes.PatientRoutes(app)
 	routes.AppointmentRoutes(app)
 
 	app.Listen(":" + configs.EnvPort())
