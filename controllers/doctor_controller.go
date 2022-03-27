@@ -12,6 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,7 +21,10 @@ func GetAllDoctors(c *fiber.Ctx) error {
 	var users []models.User
 	defer cancel()
 
-	results, err := userCollection.Find(ctx, bson.M{"role": "doctor"})
+	query := bson.M{"role": "doctor"}
+	opts := options.Find().SetProjection(bson.D{{"schedule", 0}})
+
+	results, err := userCollection.Find(ctx, query, opts)
 
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
@@ -28,12 +32,12 @@ func GetAllDoctors(c *fiber.Ctx) error {
 
 	//reading from the db in an optimal way
 	defer results.Close(ctx)
+
 	for results.Next(ctx) {
 		var singleUser models.User
 		if err = results.Decode(&singleUser); err != nil {
 			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
 		}
-
 		users = append(users, singleUser)
 	}
 
