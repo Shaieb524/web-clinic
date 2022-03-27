@@ -174,9 +174,6 @@ func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primiti
 }
 
 func ViewAppointmentDetails(c *fiber.Ctx) error {
-	// ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	// defer cancel()
-
 	var requestData map[string]interface{}
 	if err := c.BodyParser(&requestData); err != nil {
 		return err
@@ -185,6 +182,13 @@ func ViewAppointmentDetails(c *fiber.Ctx) error {
 	doctorId := requestData["doctorId"]
 	doctorProfile := getDoctorProfileByStringId(doctorId.(string))
 	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["slotDay"].(string), int32(requestData["slotNo"].(float64)))
+
+	if err := requestData["role"] == "patient" && requestData["patientId"] != slot.(primitive.M)["patientid"]; err {
+		return c.Status(http.StatusUnauthorized).JSON(
+			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: &fiber.Map{"message": "your are not authorized!"}},
+		)
+	}
+
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"appointment_details": slot}},
 	)
