@@ -73,9 +73,6 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
 
-	// fmt.Println("doc id : ", doctorObjId)
-	// fmt.Printf("doc id %T\n: ", doctorObjId)
-
 	fmt.Println("newSlotData : ", newSlotData)
 
 	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
@@ -147,8 +144,6 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 }
 
 func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int32) interface{} {
-	fmt.Println("---------------------Extract-------------------------: ")
-
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
 	ws := ds.(primitive.M)["weeklyschedule"]
@@ -224,6 +219,31 @@ func insertToBookedAppointmentsCollection(ba models.BookedAppointment) {
 	fmt.Println("insert res /L ", result)
 }
 
-// func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
+func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-// }
+	idParam := c.Params("id")
+	query := bson.M{"patientid": idParam}
+	results, err := bookedAppointmentsCollection.Find(ctx, query)
+
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	}
+
+	//reading from the db in an optimal way
+	defer results.Close(ctx)
+
+	var paitentBookedAppointments []models.BookedAppointment
+	for results.Next(ctx) {
+		var singleAppointment models.BookedAppointment
+		if err = results.Decode(&singleAppointment); err != nil {
+			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		}
+		paitentBookedAppointments = append(paitentBookedAppointments, singleAppointment)
+	}
+
+	return c.Status(http.StatusOK).JSON(
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"patient_appointments": paitentBookedAppointments}},
+	)
+}
