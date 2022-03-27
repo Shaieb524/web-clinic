@@ -65,16 +65,8 @@ func GetDoctorByName(c *fiber.Ctx) error {
 }
 
 func GetDoctorById(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	idParam := c.Params("id")
-	doctorId, err := primitive.ObjectIDFromHex(idParam)
-	query := bson.D{{Key: "_id", Value: doctorId}}
-
-	var doctorDoc bson.M
-	if err = userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
-		fmt.Println(err)
-	}
+	doctorDoc := getDoctorProfileByStringId(idParam)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctor": doctorDoc}},
@@ -82,21 +74,31 @@ func GetDoctorById(c *fiber.Ctx) error {
 }
 
 func GetDoctorScheduleById(c *fiber.Ctx) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	idParam := c.Params("doctorId")
-	doctorId, err := primitive.ObjectIDFromHex(idParam)
-
-	query := bson.D{{Key: "_id", Value: doctorId}}
-
-	var doctorDoc bson.M
-	if err = userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
-		fmt.Println(err)
-	}
+	doctorDoc := getDoctorProfileByStringId(idParam)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"schedule": doctorDoc["schedule"]}},
 	)
+}
+
+func getDoctorProfileByStringId(strDoctorId string) bson.M {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	doctorId, err := primitive.ObjectIDFromHex(strDoctorId)
+	if err != nil {
+		fmt.Println("error converting id from hex")
+	}
+
+	query := bson.D{{Key: "_id", Value: doctorId}}
+
+	var doctorDoc bson.M
+	if err := userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
+		fmt.Println(err)
+	}
+
+	return doctorDoc
 }
 
 func GetAvailableDoctors(c *fiber.Ctx) error {
