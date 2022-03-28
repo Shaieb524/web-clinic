@@ -2,6 +2,7 @@
 
 Web Clinic API is an authenticated backend application that is used to book doctor-patient appointments with proper administration tools for admin users.
 The api is built over golang [Fiber](https://github.com/gofiber/fiber) framework.
+You can check [diagrams](./diagrams) for better understanding of the application logic.
 
 ## Installation
 
@@ -27,9 +28,9 @@ nodemon --exec "go run" ./main.go --signal SIGTERM
 ```
 ## Usage
 ### Postmant collection and local environment:
-[clinic-web-api.postman_collection.json](./postmant/clinic-web-api.postman_collection.json)
+[clinic-web-api.postman_collection.json](./postman/clinic-web-api.postman_collection.json)
 
-[local.postman_environment.json](./postmant/local.postman_environment.json)
+[local.postman_environment.json](./postman/local.postman_environment.json)
 
 ## Test
 ```bash
