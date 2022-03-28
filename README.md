@@ -33,8 +33,10 @@ nodemon --exec "go run" ./main.go --signal SIGTERM
 [local.postman_environment.json](./postman/local.postman_environment.json)
 
 ## Test
+Run scripts inside [tests directory](./tests) with :
+
 ```bash
-go test
+go test -v ./tests/test_script.go
 ```
 
 ## Contributing
