@@ -12,13 +12,7 @@
 					"name": "Ping",
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc3ODk4NTMsImlzcyI6ImZhZGlAZ21haWwuY29tIn0.mRs7DHUCjQhdJ3w4QArA9LSSYwR05cbdN2p0ZLw4V3c",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{clinic_api}}/ping",
 							"host": [
@@ -38,7 +32,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"hhh\",\r\n    \"email\": \"hhh@gmail.com\",\r\n    \"password\": \"hhh\",\r\n    \"role\": \"1\" \r\n}",
+							"raw": "{\r\n    \"name\": \"d3\",\r\n    \"email\": \"s@gmail.com\",\r\n    \"password\": \"xxx\",\r\n    \"role\": \"doctor\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -64,7 +58,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"hhh@gmail.com\",\r\n    \"password\": \"hhh\"\r\n}",
+							"raw": "{\r\n    \"email\": \"samer@gmail.com\",\r\n    \"password\": \"samer\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -89,58 +83,416 @@
 			"name": "restricted",
 			"item": [
 				{
-					"name": "Get user",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{clinic_api}}/user/6234c542e8826db7aabde7c5",
-							"host": [
-								"{{clinic_api}}"
-							],
-							"path": [
-								"user",
-								"6234c542e8826db7aabde7c5"
-							]
+					"name": "users",
+					"item": [
+						{
+							"name": "Get user",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{clinic_api}}/user/6234c542e8826db7aabde7c5",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"user",
+										"6234c542e8826db7aabde7c5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc5NDIyMjIsImlzcyI6InNhbWVyQGdtYWlsLmNvbSJ9.mHLuSwKVuYNOuNvbWbZOtjuAKPgwdiy7gGc49au0bnY",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{clinic_api}}/users",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "Authorization",
+											"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "Get all users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{clinic_api}}/users",
-							"host": [
-								"{{clinic_api}}"
-							],
-							"path": [
-								"users"
-							],
-							"query": [
-								{
-									"key": "Authorization",
-									"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
-									"disabled": true
+					"name": "doctors",
+					"item": [
+						{
+							"name": "get all doctors",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{clinic_api}}/doctors",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"doctors"
+									],
+									"query": [
+										{
+											"key": "available",
+											"value": "true",
+											"disabled": true
+										}
+									]
 								}
-							]
+							},
+							"response": []
+						},
+						{
+							"name": "get doctor by name",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc5NTA0NjYsImlzcyI6InNhbWVyQGdtYWlsLmNvbSJ9.0wQgXTQmBsc1gAsYR-Ok_s-4tKO9jNC6pqsS7s5EfqM",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{clinic_api}}/doctors/:name",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"doctors",
+										":name"
+									],
+									"query": [
+										{
+											"key": "Authorization",
+											"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4Nzc3MjMsImlzcyI6InNhd3NhbkBnbWFpbC5jb20ifQ.zGSR4FHU02fjSnr1TrTYc_OIqwC_k809gQfbLZanGGM",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "name",
+											"value": "sawsan"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get doctor by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc5NTA0NjYsImlzcyI6InNhbWVyQGdtYWlsLmNvbSJ9.0wQgXTQmBsc1gAsYR-Ok_s-4tKO9jNC6pqsS7s5EfqM",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{clinic_api}}/doctors/:id",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"doctors",
+										":id"
+									],
+									"query": [
+										{
+											"key": "id",
+											"value": "62398b4d29e44be1d0ab8427",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6240cd602d92c2456c5685b5"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "view doctor schedule",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{clinic_api}}/doctors/:doctorId/slots",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"doctors",
+										":doctorId",
+										"slots"
+									],
+									"variable": [
+										{
+											"key": "doctorId",
+											"value": "6240cd602d92c2456c5685b5"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "view available doctors",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"test\": \"test\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{clinic_api}}/doctors/available",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"doctors",
+										"available"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
+				},
+				{
+					"name": "patients",
+					"item": [
+						{
+							"name": "get all patients",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{clinic_api}}/patients",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"patients"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get patient by id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{clinic_api}}/patients/:id",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"patients",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "62409d443568e541d2d24e7c"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "get appointments history",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{clinic_api}}/patients/:id/appointments-history",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"patients",
+										":id",
+										"appointments-history"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6240e03b1f501365a445f304"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "appointments",
+					"item": [
+						{
+							"name": "book appointment slot",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"role\": \"patient\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"6240e03b1f501365a445f304\",\r\n        \"patientId\" : \"6240e03b1f501365a445f304\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"2\",\r\n        \"duration\": \"1\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{clinic_api}}/appointments/book-appointment",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"appointments",
+										"book-appointment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "cancel appointement",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"role\": \"admin\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"623e1d46344a495efc0eec22\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"3\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{clinic_api}}/appointments/cancel-appointment",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"appointments",
+										"cancel-appointment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "view appointment",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"role\": \"doctor\",\r\n    \"patientId\": \"sfff\",\r\n    \"doctorId\": \"623e1d46344a495efc0eec22\",\r\n    \"appointmentDay\": \"Friday\",\r\n    \"slotNo\": 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{clinic_api}}/appointments/view-appointment",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"appointments",
+										"view-appointment"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Admins",
+					"item": [
+						{
+							"name": "get doctors with most daily appointments",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"day\": \"Friday\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{clinic_api}}/admins/dr-with-most-daily-appointments",
+									"host": [
+										"{{clinic_api}}"
+									],
+									"path": [
+										"admins",
+										"dr-with-most-daily-appointments"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		}
