@@ -85,7 +85,7 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 		Day:       requestSlotdata.AppointmentDay,
 		Duration:  newSlotData.Duration,
 	}
-	insertToBookedAppointmentsCollection(bookedAppointmentItem)
+	insertItemToBookedAppointmentsCollection(bookedAppointmentItem)
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
@@ -136,13 +136,15 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 
 	var newSlotData SlotUpdateData
 	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
-	fmt.Println("newSlot : ", newSlotData)
+
+	deleteItemFromBookedAppointmentsCollection(requestSlotdata.DoctorID, requestSlotdata.AppointmentDay, int32(intSlotNo))
 
 	return c.Status(http.StatusOK).JSON(
 		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"canceledSlot": updatedSlot}},
 	)
 }
 
+//TODO should return error handle
 func ExtractAppoinmentSlotFromDoctorProfile(doctorProfile primitive.M, slotDay string, slotNo int32) interface{} {
 	// break down doctor schedule data structure
 	ds := doctorProfile["schedule"]
@@ -193,7 +195,7 @@ func ViewAppointmentDetails(c *fiber.Ctx) error {
 
 	doctorId := requestData["doctorId"]
 	doctorProfile := getDoctorProfileByStringId(doctorId.(string))
-	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["slotDay"].(string), int32(requestData["slotNo"].(float64)))
+	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["appointmentDay"].(string), int32(requestData["slotNo"].(float64)))
 
 	if err := requestData["role"] == "patient" && requestData["patientId"] != slot.(primitive.M)["patientid"]; err {
 		return c.Status(http.StatusUnauthorized).JSON(
@@ -206,17 +208,37 @@ func ViewAppointmentDetails(c *fiber.Ctx) error {
 	)
 }
 
-func insertToBookedAppointmentsCollection(ba models.BookedAppointment) {
+func insertItemToBookedAppointmentsCollection(ba models.BookedAppointment) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	result, err := bookedAppointmentsCollection.InsertOne(ctx, ba)
 
 	if err != nil {
-		fmt.Println("erro : ", err)
+		fmt.Println("err inserting item from booked appointments : ", err)
 	}
 
-	fmt.Println("insert res /L ", result)
+	fmt.Println("item inserted to booked appointemtn res : ", result)
+}
+
+func deleteItemFromBookedAppointmentsCollection(doctorId string, slotDay string, slotNo int32) {
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+
+	query := bson.M{
+		"$and": []bson.M{
+			{"doctorid": doctorId},
+			{"day": slotDay},
+			{"slotno": slotNo},
+		},
+	}
+	result, err := bookedAppointmentsCollection.DeleteOne(ctx, query)
+
+	if err != nil {
+		fmt.Println("err deleting item from booked appointments : ", err)
+	}
+
+	fmt.Println("item deleted from booked appointemtn res : ", result)
 }
 
 func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
