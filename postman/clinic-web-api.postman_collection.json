@@ -32,7 +32,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"name\": \"d3\",\r\n    \"email\": \"s@gmail.com\",\r\n    \"password\": \"xxx\",\r\n    \"role\": \"doctor\" \r\n}",
+							"raw": "{\r\n    \"name\": \"patient1\",\r\n    \"email\": \"patient1@gmail.com\",\r\n    \"password\": \"xxx\",\r\n    \"role\": \"doctor\" \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -53,12 +53,26 @@
 				},
 				{
 					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var response = pm.response.json()\r",
+									"\r",
+									"console.log(\"response : \", response.data[\"access_token \"])\r",
+									"pm.environment.set(\"jwt_token\", response.data[\"access_token \"])"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"samer@gmail.com\",\r\n    \"password\": \"samer\"\r\n}",
+							"raw": "{\r\n    \"email\": \"doctor1@gmail.com\",\r\n    \"password\": \"xxx\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -121,7 +135,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{clinic_api}}/users",
+									"raw": "{{clinic_api}}/users?Authorization=Bearer {{jwt_token}}",
 									"host": [
 										"{{clinic_api}}"
 									],
@@ -131,8 +145,7 @@
 									"query": [
 										{
 											"key": "Authorization",
-											"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc4MDA2OTgsImlzcyI6ImhoaEBnbWFpbC5jb20ifQ.04vN1ZxSkxkmGkvR0WuiZ-4A-CGpRuqNMAd7icXtoBU",
-											"disabled": true
+											"value": "Bearer {{jwt_token}}"
 										}
 									]
 								}
@@ -151,7 +164,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "",
+										"value": "Bearer {{jwt_token}}",
 										"type": "text"
 									}
 								],
@@ -181,7 +194,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc5NTA0NjYsImlzcyI6InNhbWVyQGdtYWlsLmNvbSJ9.0wQgXTQmBsc1gAsYR-Ok_s-4tKO9jNC6pqsS7s5EfqM",
+										"value": "Bearer {{jwt_token}}",
 										"type": "text"
 									}
 								],
@@ -218,7 +231,7 @@
 								"header": [
 									{
 										"key": "Authorization",
-										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDc5NTA0NjYsImlzcyI6InNhbWVyQGdtYWlsLmNvbSJ9.0wQgXTQmBsc1gAsYR-Ok_s-4tKO9jNC6pqsS7s5EfqM",
+										"value": "Bearer {{jwt_token}}",
 										"type": "text"
 									}
 								],
@@ -241,7 +254,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "6240cd602d92c2456c5685b5"
+											"value": "6241b4a63c0b1d394eeafb10"
 										}
 									]
 								}
@@ -252,7 +265,13 @@
 							"name": "view doctor schedule",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"url": {
 									"raw": "{{clinic_api}}/doctors/:doctorId/slots",
 									"host": [
@@ -266,7 +285,7 @@
 									"variable": [
 										{
 											"key": "doctorId",
-											"value": "6240cd602d92c2456c5685b5"
+											"value": "6241b4a63c0b1d394eeafb10"
 										}
 									]
 								}
@@ -280,7 +299,13 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"test\": \"test\"\r\n}",
@@ -312,15 +337,15 @@
 							"name": "get all patients",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"url": {
-									"raw": "{{clinic_api}}/patients",
-									"host": [
-										"{{clinic_api}}"
-									],
-									"path": [
-										"patients"
-									]
+									"raw": ""
 								}
 							},
 							"response": []
@@ -329,7 +354,13 @@
 							"name": "get patient by id",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"url": {
 									"raw": "{{clinic_api}}/patients/:id",
 									"host": [
@@ -353,7 +384,13 @@
 							"name": "get appointments history",
 							"request": {
 								"method": "GET",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"url": {
 									"raw": "{{clinic_api}}/patients/:id/appointments-history",
 									"host": [
@@ -367,7 +404,7 @@
 									"variable": [
 										{
 											"key": "id",
-											"value": "6240e03b1f501365a445f304"
+											"value": "6241b5f73c0b1d394eeafb11"
 										}
 									]
 								}
@@ -383,10 +420,16 @@
 							"name": "book appointment slot",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"role\": \"patient\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"6240e03b1f501365a445f304\",\r\n        \"patientId\" : \"6240e03b1f501365a445f304\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"2\",\r\n        \"duration\": \"1\"\r\n    }\r\n}",
+									"raw": "{\r\n    \"role\": \"patient\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"6241b4a63c0b1d394eeafb10\",\r\n        \"patientId\" : \"6241b5f73c0b1d394eeafb11\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"1\",\r\n        \"duration\": \"2\"\r\n    }\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -410,10 +453,16 @@
 							"name": "cancel appointement",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"role\": \"admin\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"623e1d46344a495efc0eec22\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"3\"\r\n    }\r\n}",
+									"raw": "{\r\n    \"role\": \"doctor\",\r\n    \"slotData\": {\r\n        \"doctorId\" : \"6241b4a63c0b1d394eeafb10\",\r\n        \"appointmentDay\": \"Friday\",\r\n        \"slotNo\": \"1\"\r\n    }\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -437,10 +486,16 @@
 							"name": "view appointment",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"role\": \"doctor\",\r\n    \"patientId\": \"sfff\",\r\n    \"doctorId\": \"623e1d46344a495efc0eec22\",\r\n    \"appointmentDay\": \"Friday\",\r\n    \"slotNo\": 3\r\n}",
+									"raw": "{\r\n    \"role\": \"doctor\",\r\n    \"patientId\": \"6241b5f7s3c0b1d394eeafb11\",\r\n    \"doctorId\": \"6241b4a63c0b1d394seeafb10\",\r\n    \"appointmentDay\": \"Friday\",\r\n    \"slotNo\": 1\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -469,7 +524,13 @@
 							"name": "get doctors with most daily appointments",
 							"request": {
 								"method": "POST",
-								"header": [],
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{jwt_token}}",
+										"type": "text"
+									}
+								],
 								"body": {
 									"mode": "raw",
 									"raw": "{\r\n    \"day\": \"Friday\"\r\n}",

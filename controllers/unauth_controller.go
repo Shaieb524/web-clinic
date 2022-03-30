@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -81,29 +82,33 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	pair, err := generateTokenPair(user.Email)
+
+	// fmt.Println("pair : ", pair)
+	fmt.Println("pair : ", pair.access_token)
+
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Login failed!"}})
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"pair ": pair}})
+	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"access_token ": pair.access_token}})
 }
 
 type tokenPair struct {
-	Token        string
-	RefreshToken string
+	access_token  string
+	refresh_token string
 }
 
 func generateTokenPair(userEmail string) (tokenPair, error) {
 
 	var tPair tokenPair
 
-	// create token
+	// create access token
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    userEmail,
 		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
 	})
 
-	token, err := claims.SignedString([]byte(configs.EnvTokenSecretKey()))
+	atoken, err := claims.SignedString([]byte(configs.EnvTokenSecretKey()))
 	if err != nil {
 		return tPair, err
 	}
@@ -119,7 +124,7 @@ func generateTokenPair(userEmail string) (tokenPair, error) {
 		return tPair, err
 	}
 
-	tPair = tokenPair{Token: token, RefreshToken: rtoken}
+	tPair = tokenPair{access_token: atoken, refresh_token: rtoken}
 
 	return tPair, nil
 }
