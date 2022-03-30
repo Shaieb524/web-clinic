@@ -9,8 +9,8 @@ import (
 	"github.com/Shaieb524/web-clinic.git/configs"
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
+	"github.com/gin-gonic/gin"
 
-	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,9 +18,9 @@ import (
 
 var userCollection *mongo.Collection = configs.GetCollection(configs.DB, "users")
 
-func GetAUser(c *fiber.Ctx) error {
+func GetAUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	userId := c.Params("userId")
+	userId := c.Param("userId")
 	var user models.User
 	defer cancel()
 
@@ -29,13 +29,14 @@ func GetAUser(c *fiber.Ctx) error {
 	err := userCollection.FindOne(ctx, bson.M{"id": objId}).Decode(&user)
 	if err != nil {
 		fmt.Println("error getting a user : ", userId, user)
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": user}})
+	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": user}})
 }
 
-func GetAllUsers(c *fiber.Ctx) error {
+func GetAllUsers(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var users []models.User
 	defer cancel()
@@ -43,7 +44,8 @@ func GetAllUsers(c *fiber.Ctx) error {
 	results, err := userCollection.Find(ctx, bson.M{})
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	//reading from the db in an optimal way
@@ -51,13 +53,14 @@ func GetAllUsers(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleUser models.User
 		if err = results.Decode(&singleUser); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 
 		users = append(users, singleUser)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"data": users}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"data": users}},
 	)
 }

@@ -9,14 +9,15 @@ import (
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetAllDoctors(c *fiber.Ctx) error {
+func GetAllDoctors(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var users []models.User
 	defer cancel()
@@ -27,7 +28,8 @@ func GetAllDoctors(c *fiber.Ctx) error {
 	results, err := userCollection.Find(ctx, query, opts)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	//reading from the db in an optimal way
@@ -36,21 +38,22 @@ func GetAllDoctors(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleUser models.User
 		if err = results.Decode(&singleUser); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 		users = append(users, singleUser)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctors": users}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"doctors": users}},
 	)
 }
 
-func GetDoctorByName(c *fiber.Ctx) error {
+func GetDoctorByName(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	nameParam := c.Params("name")
+	nameParam := c.Param("name")
 	query := bson.D{{Key: "name", Value: nameParam}}
 
 	var doctorDoc bson.M
@@ -59,26 +62,26 @@ func GetDoctorByName(c *fiber.Ctx) error {
 		fmt.Println(err)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctor": doctorDoc}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"doctor": doctorDoc}},
 	)
 }
 
-func GetDoctorById(c *fiber.Ctx) error {
-	idParam := c.Params("id")
+func GetDoctorById(c *gin.Context) {
+	idParam := c.Param("id")
 	doctorDoc := getDoctorProfileByStringId(idParam)
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"doctor": doctorDoc}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"doctor": doctorDoc}},
 	)
 }
 
-func GetDoctorScheduleById(c *fiber.Ctx) error {
-	idParam := c.Params("doctorId")
+func GetDoctorScheduleById(c *gin.Context) {
+	idParam := c.Param("id")
 	doctorDoc := getDoctorProfileByStringId(idParam)
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"schedule": doctorDoc["schedule"]}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"schedule": doctorDoc["schedule"]}},
 	)
 }
 
@@ -101,7 +104,7 @@ func getDoctorProfileByStringId(strDoctorId string) bson.M {
 	return doctorDoc
 }
 
-func GetAvailableDoctors(c *fiber.Ctx) error {
+func GetAvailableDoctors(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var users []models.User
 	defer cancel()
@@ -117,7 +120,8 @@ func GetAvailableDoctors(c *fiber.Ctx) error {
 	results, err := userCollection.Find(ctx, query, opts)
 	fmt.Println("available results : ", results)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	//reading from the db in an optimal way
@@ -126,12 +130,13 @@ func GetAvailableDoctors(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleUser models.User
 		if err = results.Decode(&singleUser); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 		users = append(users, singleUser)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"available_doctors": users}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"available_doctors": users}},
 	)
 }

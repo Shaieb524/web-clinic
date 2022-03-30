@@ -1,34 +1,27 @@
 package main
 
 import (
+	// "fmt"
+	// "time"
+
 	"github.com/Shaieb524/web-clinic.git/configs"
 	"github.com/Shaieb524/web-clinic.git/routes"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	jwtware "github.com/gofiber/jwt/v3"
+	"github.com/gin-gonic/gin"
+	// 	jwt "github.com/appleboy/gin-jwt/v2"
 )
 
 func main() {
-	app := fiber.New()
+	app := gin.Default()
 	configs.ConnectDB()
-
-	// logger middleware
-	app.Use(logger.New())
 
 	// unauthorized routes
 	routes.UnauthRoutes(app)
-
-	// JWT validation
-	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(configs.EnvTokenSecretKey()),
-	}))
-
 	// restricted routes
 	routes.UserRoutes(app)
 	routes.DoctorRoutes(app)
 	routes.PatientRoutes(app)
 	routes.AppointmentRoutes(app)
 
-	app.Listen(":" + configs.EnvPort())
+	app.Run(":" + configs.EnvPort())
 }

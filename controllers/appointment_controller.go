@@ -11,9 +11,9 @@ import (
 	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/models"
+	"github.com/gin-gonic/gin"
 
 	"github.com/Shaieb524/web-clinic.git/responses"
-	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -27,20 +27,25 @@ type SlotUpdateData struct {
 	isBooked  bool
 }
 
-func BookAppointmentSlot(c *fiber.Ctx) error {
+func BookAppointmentSlot(c *gin.Context) {
+
+	fmt.Println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	requestData := new(customsturctures.BookSlotRequest)
-	if err := c.BodyParser(&requestData); err != nil {
-		return err
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "failed to parse request", Data: map[string]interface{}{"error": "could't validate request body!"}})
+		return
 	}
 
 	if checkRoleResult := helpers.RoleValidator(requestData.Role, "patient"); checkRoleResult != "allowed" {
-		return c.Status(http.StatusUnauthorized).JSON(
+		c.JSON(http.StatusUnauthorized,
 			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed",
-				Data: &fiber.Map{"problem": "Only patients are allowed to book appointment slots!"}},
+				Data: map[string]interface{}{"problem": "Only patients are allowed to book appointment slots!"}},
 		)
+		return
 	}
 
 	requestSlotdata := requestData.Slotdata
@@ -54,26 +59,24 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 
 	var doctorDoc bson.M
 	if err := userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
-		fmt.Println("Error finding doctor : ", err)
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
+		c.JSON(http.StatusInternalServerError,
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "Error finding doctor", Data: map[string]interface{}{"error": err}},
 		)
+		return
 	}
 
 	intSlotNo, err := strconv.Atoi(requestSlotdata.SlotNo)
 	if err != nil {
-		fmt.Println("error parsing slotNo to integer!", err)
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
+		c.JSON(http.StatusInternalServerError,
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "error parsing slotNo to integer!", Data: map[string]interface{}{"error": err}},
 		)
+		return
 	}
 
 	var newSlotData SlotUpdateData
 	newSlotData.PatientID = requestSlotdata.PatientID
 	newSlotData.Duration, err = strconv.Atoi(requestSlotdata.Duration)
 	newSlotData.isBooked = true
-
-	fmt.Println("newSlotData : ", newSlotData)
 
 	updatedSlot := UpdateAppointmentSlot(doctorObjId, doctorDoc, requestSlotdata.AppointmentDay, int32(intSlotNo), newSlotData)
 
@@ -87,26 +90,28 @@ func BookAppointmentSlot(c *fiber.Ctx) error {
 	}
 	insertItemToBookedAppointmentsCollection(bookedAppointmentItem)
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"bookedSlot": updatedSlot}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"bookedSlot": updatedSlot}},
 	)
 }
 
-func CancelAppointmentSlot(c *fiber.Ctx) error {
+func CancelAppointmentSlot(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	requestData := new(customsturctures.BookSlotRequest)
-	if err := c.BodyParser(&requestData); err != nil {
-		return err
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "failed", Data: map[string]interface{}{"data": "could't validate request body!"}})
+		return
 	}
 
 	checkRoleResult := requestData.Role
 	if checkRoleResult != "doctor" && checkRoleResult != "admin" {
-		return c.Status(http.StatusUnauthorized).JSON(
+		c.JSON(http.StatusUnauthorized,
 			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed",
-				Data: &fiber.Map{"problem": "Only Doctor & Admins are allowed to cancel an appointment!"}},
+				Data: map[string]interface{}{"problem": "Only Doctor & Admins are allowed to cancel an appointment!"}},
 		)
+		return
 	}
 
 	requestSlotdata := requestData.Slotdata
@@ -121,17 +126,19 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 	var doctorDoc bson.M
 	if err := userCollection.FindOne(ctx, query).Decode(&doctorDoc); err != nil {
 		fmt.Println("Error finding doctor : ", err)
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
+		c.JSON(http.StatusInternalServerError,
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: map[string]interface{}{"problem": err}},
 		)
+		return
 	}
 
 	intSlotNo, err := strconv.Atoi(requestSlotdata.SlotNo)
 	if err != nil {
 		fmt.Println("error parsing slotNo to integer!", err)
-		return c.Status(http.StatusInternalServerError).JSON(
-			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: &fiber.Map{"problem": err}},
+		c.JSON(http.StatusInternalServerError,
+			responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed", Data: map[string]interface{}{"problem": err}},
 		)
+		return
 	}
 
 	var newSlotData SlotUpdateData
@@ -139,8 +146,8 @@ func CancelAppointmentSlot(c *fiber.Ctx) error {
 
 	deleteItemFromBookedAppointmentsCollection(requestSlotdata.DoctorID, requestSlotdata.AppointmentDay, int32(intSlotNo))
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"canceledSlot": updatedSlot}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"canceledSlot": updatedSlot}},
 	)
 }
 
@@ -187,10 +194,11 @@ func UpdateAppointmentSlot(doctorObjId primitive.ObjectID, doctorProfile primiti
 	return slot
 }
 
-func ViewAppointmentDetails(c *fiber.Ctx) error {
+func ViewAppointmentDetails(c *gin.Context) {
 	var requestData map[string]interface{}
-	if err := c.BodyParser(&requestData); err != nil {
-		return err
+	if err := c.BindJSON(&requestData); err != nil {
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "failed", Data: map[string]interface{}{"data": "could't validate request body!"}})
+		return
 	}
 
 	doctorId := requestData["doctorId"]
@@ -198,13 +206,14 @@ func ViewAppointmentDetails(c *fiber.Ctx) error {
 	slot := ExtractAppoinmentSlotFromDoctorProfile(doctorProfile, requestData["appointmentDay"].(string), int32(requestData["slotNo"].(float64)))
 
 	if err := requestData["role"] == "patient" && requestData["patientId"] != slot.(primitive.M)["patientid"]; err {
-		return c.Status(http.StatusUnauthorized).JSON(
-			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: &fiber.Map{"message": "your are not authorized!"}},
+		c.JSON(http.StatusUnauthorized,
+			responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: map[string]interface{}{"message": "your are not authorized!"}},
 		)
+		return
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"appointment_details": slot}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"appointment_details": slot}},
 	)
 }
 
@@ -241,16 +250,17 @@ func deleteItemFromBookedAppointmentsCollection(doctorId string, slotDay string,
 	fmt.Println("item deleted from booked appointemtn res : ", result)
 }
 
-func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
+func ViewPatientAppointmentsHistory(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	idParam := c.Params("id")
+	idParam := c.Param("id")
 	query := bson.M{"patientid": idParam}
 	results, err := bookedAppointmentsCollection.Find(ctx, query)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	//reading from the db in an optimal way
@@ -260,12 +270,13 @@ func ViewPatientAppointmentsHistory(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleAppointment models.BookedAppointment
 		if err = results.Decode(&singleAppointment); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 		paitentBookedAppointments = append(paitentBookedAppointments, singleAppointment)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"patient_appointments": paitentBookedAppointments}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"patient_appointments": paitentBookedAppointments}},
 	)
 }

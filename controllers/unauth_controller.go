@@ -12,30 +12,42 @@ import (
 	"github.com/Shaieb524/web-clinic.git/responses"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 
-	"github.com/gofiber/fiber/v2"
+	// "github.com/go-playground/validator/v10"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Ping(c *fiber.Ctx) error {
-	return c.JSON(&fiber.Map{"message": "pong"})
+// var validate = validator.New()
+
+func Ping(c *gin.Context) {
+	c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"message": "pong"}})
 }
 
-func RegisterUser(c *fiber.Ctx) error {
+func RegisterUser(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	var data map[string]string
 
-	if err := c.BodyParser(&data); err != nil {
-		return err
+	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "couldn't parse request!", Data: map[string]interface{}{"error": err}})
+		return
 	}
+
+	var newUser models.User
+	// TODO use the validator library to validate required fields
+	// if validationErr := validate.Struct(&newUser); validationErr != nil {
+	// 	c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "couldn't validate request!", Data: map[string]interface{}{"error": validationErr.Error()}})
+	// 	return
+	// }
 
 	//encypt user's password before saving to db
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 12)
 
-	newUser := models.User{
+	newUser = models.User{
 		Name:     data["name"],
 		Email:    data["email"],
 		Password: password,
@@ -54,31 +66,35 @@ func RegisterUser(c *fiber.Ctx) error {
 	result, err := userCollection.InsertOne(ctx, newUser)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "failed to reigster user!", Data: map[string]interface{}{"error": err.Error()}})
+		return
 	}
 
-	return c.Status(http.StatusCreated).JSON(responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: &fiber.Map{"user": result}})
+	c.JSON(http.StatusCreated, responses.UserResponse{Status: http.StatusCreated, Message: "success", Data: map[string]interface{}{"user": result}})
 }
 
-func Login(c *fiber.Ctx) error {
+func Login(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 
 	var data map[string]string
 
-	if err := c.BodyParser(&data); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+	if err := c.BindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	var user models.User
 	err := userCollection.FindOne(ctx, bson.M{"email": data["email"]}).Decode(&user)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Invalid Credentials"}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Invalid Credentials"}})
+		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Invalid Credentials"}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Invalid Credentials"}})
+		return
 	}
 
 	pair, err := generateTokenPair(user.Email)
@@ -87,10 +103,11 @@ func Login(c *fiber.Ctx) error {
 	fmt.Println("pair : ", pair.access_token)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"message": "Login failed!"}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Login failed!"}})
+		return
 	}
 
-	return c.Status(http.StatusOK).JSON(responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"access_token ": pair.access_token}})
+	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"access_token ": pair.access_token}})
 }
 
 type tokenPair struct {
@@ -134,7 +151,7 @@ func generateTokenPair(userEmail string) (tokenPair, error) {
 // This is the api to refresh tokens
 // Most of the code is taken from the jwt-go package's sample codes
 // https://godoc.org/github.com/dgrijalva/jwt-go#example-Parse--Hmac
-// func RefreshToken(c echo.Context) error {
+// func RefreshToken(c echo.Context) {
 // 	type tokenReqBody struct {
 // 		RefreshToken string `json:"refresh_token"`
 // 	}
