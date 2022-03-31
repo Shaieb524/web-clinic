@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -81,7 +80,7 @@ func Login(c *gin.Context) {
 	var data map[string]string
 
 	if err := c.BindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		c.JSON(http.StatusBadRequest, responses.UserResponse{Status: http.StatusBadRequest, Message: "failed", Data: map[string]interface{}{"data": err.Error()}})
 		return
 	}
 
@@ -89,26 +88,23 @@ func Login(c *gin.Context) {
 	err := userCollection.FindOne(ctx, bson.M{"email": data["email"]}).Decode(&user)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Invalid Credentials"}})
+		c.JSON(http.StatusUnauthorized, responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: map[string]interface{}{"message": "Invalid Credentials"}})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Invalid Credentials"}})
+		c.JSON(http.StatusUnauthorized, responses.UserResponse{Status: http.StatusUnauthorized, Message: "failed", Data: map[string]interface{}{"message": "Invalid Credentials"}})
 		return
 	}
 
 	pair, err := generateTokenPair(user.Email)
-
-	// fmt.Println("pair : ", pair)
-	fmt.Println("pair : ", pair.Access_Token)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Login failed!"}})
 		return
 	}
 
-	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"access_token ": pair.Access_Token}})
+	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"access_token": pair.Access_Token}})
 }
 
 func generateTokenPair(userEmail string) (customsturctures.TokenPair, error) {
@@ -132,10 +128,7 @@ func generateTokenPair(userEmail string) (customsturctures.TokenPair, error) {
 	}
 
 	// create refresh token
-	rtclaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    userEmail,
-		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
-	})
+	rtclaims := jwt.NewWithClaims(jwt.SigningMethodHS256, authClaim)
 
 	rtoken, err := rtclaims.SignedString([]byte(configs.EnvRefreshTokenSecretKey()))
 	if err != nil {

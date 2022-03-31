@@ -5,6 +5,7 @@ import (
 	// "time"
 
 	"github.com/Shaieb524/web-clinic.git/configs"
+	"github.com/Shaieb524/web-clinic.git/middlewares"
 	"github.com/Shaieb524/web-clinic.git/routes"
 
 	"github.com/gin-gonic/gin"
@@ -12,16 +13,20 @@ import (
 )
 
 func main() {
-	app := gin.Default()
+	router := gin.Default()
 	configs.ConnectDB()
 
 	// unauthorized routes
-	routes.UnauthRoutes(app)
-	// restricted routes
-	routes.UserRoutes(app)
-	routes.DoctorRoutes(app)
-	routes.PatientRoutes(app)
-	routes.AppointmentRoutes(app)
+	routes.UnauthRoutes(router)
 
-	app.Run(":" + configs.EnvPort())
+	// jwt middleware auth
+	router.Use(middlewares.JWTauthentication())
+
+	// restricted routes
+	routes.UserRoutes(router)
+	routes.DoctorRoutes(router)
+	routes.PatientRoutes(router)
+	routes.AppointmentRoutes(router)
+
+	router.Run(":" + configs.EnvPort())
 }
