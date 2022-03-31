@@ -10,10 +10,13 @@ import (
 	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/responses"
+	"go.uber.org/zap"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+var customLogger *zap.Logger = helpers.CustomLogger()
 
 func JWTauthentication() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -22,8 +25,6 @@ func JWTauthentication() gin.HandlerFunc {
 }
 
 func verifyToken(c *gin.Context) {
-	customLogger := helpers.CustomLogger()
-
 	token, ok := getTokenFromHeader(c)
 	if !ok {
 		customLogger.Error("Error extracting token from header")
@@ -47,8 +48,6 @@ func verifyToken(c *gin.Context) {
 }
 
 func getTokenFromHeader(c *gin.Context) (string, bool) {
-	customLogger := helpers.CustomLogger()
-
 	authValue := c.GetHeader("Authorization")
 
 	arr := strings.Split(authValue, " ")
@@ -63,14 +62,11 @@ func getTokenFromHeader(c *gin.Context) (string, bool) {
 		return "", false
 	}
 	token := strings.Trim(arr[1], "\n\t\r")
-	customLogger.Info(token)
 
 	return token, true
 }
 
 func validateToken(tokenString string) (string, error) {
-
-	customLogger := helpers.CustomLogger()
 
 	var claims customsturctures.AuthClaimers
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
