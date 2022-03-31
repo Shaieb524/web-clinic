@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/Shaieb524/web-clinic.git/configs"
+	"github.com/Shaieb524/web-clinic.git/customsturctures"
 	"github.com/Shaieb524/web-clinic.git/helpers"
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
@@ -100,30 +101,30 @@ func Login(c *gin.Context) {
 	pair, err := generateTokenPair(user.Email)
 
 	// fmt.Println("pair : ", pair)
-	fmt.Println("pair : ", pair.access_token)
+	fmt.Println("pair : ", pair.Access_Token)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"message": "Login failed!"}})
 		return
 	}
 
-	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"access_token ": pair.access_token}})
+	c.JSON(http.StatusOK, responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"access_token ": pair.Access_Token}})
 }
 
-type tokenPair struct {
-	access_token  string
-	refresh_token string
-}
+func generateTokenPair(userEmail string) (customsturctures.TokenPair, error) {
 
-func generateTokenPair(userEmail string) (tokenPair, error) {
+	var tPair customsturctures.TokenPair
 
-	var tPair tokenPair
+	authClaim := customsturctures.AuthClaimers{
+		StandardClaims: jwt.StandardClaims{
+			Subject:   userEmail,
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+		},
+		Email: userEmail,
+	}
 
 	// create access token
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer:    userEmail,
-		ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
-	})
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, authClaim)
 
 	atoken, err := claims.SignedString([]byte(configs.EnvTokenSecretKey()))
 	if err != nil {
@@ -141,7 +142,7 @@ func generateTokenPair(userEmail string) (tokenPair, error) {
 		return tPair, err
 	}
 
-	tPair = tokenPair{access_token: atoken, refresh_token: rtoken}
+	tPair = customsturctures.TokenPair{Access_Token: atoken, Refresh_Token: rtoken}
 
 	return tPair, nil
 }
