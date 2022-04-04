@@ -2,12 +2,11 @@ package routes
 
 import (
 	"github.com/Shaieb524/web-clinic.git/controllers"
-
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
-func AppointmentRoutes(app *fiber.App) {
-	app.Post("/appointments/book-appointment", controllers.BookAppointmentSlot)
-	app.Post("/appointments/cancel-appointment", controllers.CancelAppointmentSlot)
-	app.Post("/appointments/view-appointment", controllers.ViewAppointmentDetails)
+func AppointmentRoutes(router *gin.Engine) {
+	router.POST("/appointments/book-appointment", controllers.BookAppointmentSlot)
+	router.POST("/appointments/cancel-appointment", controllers.CancelAppointmentSlot)
+	router.POST("/appointments/view-appointment", controllers.ViewAppointmentDetails)
 }

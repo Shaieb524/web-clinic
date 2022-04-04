@@ -8,15 +8,15 @@ import (
 
 	"github.com/Shaieb524/web-clinic.git/models"
 	"github.com/Shaieb524/web-clinic.git/responses"
+	"github.com/gin-gonic/gin"
 
-	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	// "go.mongodb.org/mongo-driver/mongo"
 )
 
-func GetAllPatients(c *fiber.Ctx) error {
+func GetAllPatients(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	var users []models.User
 	defer cancel()
@@ -27,7 +27,8 @@ func GetAllPatients(c *fiber.Ctx) error {
 	results, err := userCollection.Find(ctx, query, opts)
 
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+		c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+		return
 	}
 
 	//reading from the db in an optimal way
@@ -36,22 +37,23 @@ func GetAllPatients(c *fiber.Ctx) error {
 	for results.Next(ctx) {
 		var singleUser models.User
 		if err = results.Decode(&singleUser); err != nil {
-			return c.Status(http.StatusInternalServerError).JSON(responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: &fiber.Map{"data": err.Error()}})
+			c.JSON(http.StatusInternalServerError, responses.UserResponse{Status: http.StatusInternalServerError, Message: "error", Data: map[string]interface{}{"data": err.Error()}})
+			return
 		}
 		users = append(users, singleUser)
 	}
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"patients": users}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"patients": users}},
 	)
 }
 
-func GetPatientById(c *fiber.Ctx) error {
-	idParam := c.Params("id")
+func GetPatientById(c *gin.Context) {
+	idParam := c.Param("id")
 	patientDoc := getDPatientProfileByStringId(idParam)
 
-	return c.Status(http.StatusOK).JSON(
-		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: &fiber.Map{"patient": patientDoc}},
+	c.JSON(http.StatusOK,
+		responses.UserResponse{Status: http.StatusOK, Message: "success", Data: map[string]interface{}{"patient": patientDoc}},
 	)
 }
 

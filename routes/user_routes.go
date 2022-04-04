@@ -2,11 +2,10 @@ package routes
 
 import (
 	"github.com/Shaieb524/web-clinic.git/controllers"
-
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
-func UserRoutes(app *fiber.App) {
-	app.Get("/user/:userId", controllers.GetAUser)
-	app.Get("/users", controllers.GetAllUsers)
+func UserRoutes(router *gin.Engine) {
+	router.GET("/user/:userId", controllers.GetAUser)
+	router.GET("/users", controllers.GetAllUsers)
 }

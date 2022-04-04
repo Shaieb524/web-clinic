@@ -3,12 +3,12 @@ package routes
 import (
 	"github.com/Shaieb524/web-clinic.git/controllers"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 )
 
-func UnauthRoutes(app *fiber.App) {
-	app.Get("/ping", controllers.Ping)
-	app.Post("/register", controllers.RegisterUser)
-	app.Post("/login", controllers.Login)
-	// app.Post("/refresh-token", controllers.)
+func UnauthRoutes(router *gin.Engine) {
+	router.GET("/ping", controllers.Ping)
+	router.POST("/register", controllers.RegisterUser)
+	router.POST("/login", controllers.Login)
+	// router.POST("/refresh-token", controllers.)
 }
